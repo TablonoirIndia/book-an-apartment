@@ -13996,6 +13996,8 @@ import { useWishlist } from "../hooks/useWishlist";
 import WishlistTab from "./WishlistTab";
 import MessagesTab from "./MessagesTab";
 import InvoicesTab from "./InvoicesTab";
+import PaymentsTab from "./PaymentsTab";
+import { color } from "d3";
 
 const API_BASE = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000/api";
 
@@ -14806,152 +14808,152 @@ const NotificationsTab = ({ notifications, loading, unreadCount, onMarkRead, onM
 };
 
 // ── Payments Tab ──────────────────────────────────────────────────────────────
-const GW_CFG = {
-  razorpay: { icon: "💳", color: "#3b82f6", label: "Razorpay" },
-  stripe:   { icon: "💎", color: "#8b5cf6", label: "Stripe"   },
-  phonepe:  { icon: "📱", color: "#f59e0b", label: "PhonePe"  },
-  cash:     { icon: "💵", color: "#22c55e", label: "Cash"     },
-  manual:   { icon: "🏦", color: "#64748b", label: "Manual"   },
-};
-const TXN_STATUS = {
-  success:  { color: "#22c55e", bg: "rgba(34,197,94,0.10)",   label: "Success"  },
-  pending:  { color: "#f59e0b", bg: "rgba(245,158,11,0.10)",  label: "Pending"  },
-  failed:   { color: "#ef4444", bg: "rgba(239,68,68,0.10)",   label: "Failed"   },
-  refunded: { color: "#94a3b8", bg: "rgba(148,163,184,0.10)", label: "Refunded" },
-};
+// const GW_CFG = {
+//   razorpay: { icon: "💳", color: "#3b82f6", label: "Razorpay" },
+//   stripe:   { icon: "💎", color: "#8b5cf6", label: "Stripe"   },
+//   phonepe:  { icon: "📱", color: "#f59e0b", label: "PhonePe"  },
+//   cash:     { icon: "💵", color: "#22c55e", label: "Cash"     },
+//   manual:   { icon: "🏦", color: "#64748b", label: "Manual"   },
+// };
+// const TXN_STATUS = {
+//   success:  { color: "#22c55e", bg: "rgba(34,197,94,0.10)",   label: "Success"  },
+//   pending:  { color: "#f59e0b", bg: "rgba(245,158,11,0.10)",  label: "Pending"  },
+//   failed:   { color: "#ef4444", bg: "rgba(239,68,68,0.10)",   label: "Failed"   },
+//   refunded: { color: "#94a3b8", bg: "rgba(148,163,184,0.10)", label: "Refunded" },
+// };
 
-const PaymentsTab = ({ payments, loading, fmt, fmtExact }) => {
-  const totalPaid     = payments.filter((p) => p.status === "success").reduce((s, p) => s + parseFloat(p.amount || 0), 0);
-  const totalRefunded = payments.filter((p) => p.status === "refunded").reduce((s, p) => s + parseFloat(p.amount || 0), 0);
-  const successCount  = payments.filter((p) => p.status === "success").length;
+// const PaymentsTab = ({ payments, loading, fmt, fmtExact }) => {
+//   const totalPaid     = payments.filter((p) => p.status === "success").reduce((s, p) => s + parseFloat(p.amount || 0), 0);
+//   const totalRefunded = payments.filter((p) => p.status === "refunded").reduce((s, p) => s + parseFloat(p.amount || 0), 0);
+//   const successCount  = payments.filter((p) => p.status === "success").length;
 
-  if (loading) return (
-    <div style={{ textAlign: "center", padding: "60px 0", color: "#475569" }}>
-      <div style={{ fontSize: "32px", marginBottom: "10px" }}>⏳</div>Loading payment history...
-    </div>
-  );
+//   if (loading) return (
+//     <div style={{ textAlign: "center", padding: "60px 0", color: "#475569" }}>
+//       <div style={{ fontSize: "32px", marginBottom: "10px" }}>⏳</div>Loading payment history...
+//     </div>
+//   );
 
-  // Stat cards — refunded card only shown when there are refunds
-  const statCards = [
-    { label: "Total Paid (incl. tax)", value: fmtExact(totalPaid),    color: "#22c55e", icon: "💰" },
-    { label: "Transactions",           value: successCount,            color: "#c9a96e", icon: "🧾" },
-    { label: "Pending",                value: payments.filter((p) => p.status === "pending").length, color: "#f59e0b", icon: "⏳" },
-    ...(totalRefunded > 0 ? [{ label: "Refunded (incl. tax)", value: fmtExact(totalRefunded), color: "#ef4444", icon: "↩️" }] : []),
-  ];
+//   // Stat cards — refunded card only shown when there are refunds
+//   const statCards = [
+//     { label: "Total Paid (incl. tax)", value: fmtExact(totalPaid),    color: "#22c55e", icon: "💰" },
+//     { label: "Transactions",           value: successCount,            color: "#c9a96e", icon: "🧾" },
+//     { label: "Pending",                value: payments.filter((p) => p.status === "pending").length, color: "#f59e0b", icon: "⏳" },
+//     ...(totalRefunded > 0 ? [{ label: "Refunded (incl. tax)", value: fmtExact(totalRefunded), color: "#ef4444", icon: "↩️" }] : []),
+//   ];
 
-  return (
-    <div>
-      {payments.length > 0 && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "10px", marginBottom: "20px" }}>
-          {statCards.map(({ label, value, color, icon }) => (
-            <div key={label} style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "12px", padding: "14px 16px" }}>
-              <div style={{ fontSize: "18px", marginBottom: "6px" }}>{icon}</div>
-              <div style={{ fontSize: "20px", fontWeight: "800", color }}>{value}</div>
-              <div style={{ fontSize: "11px", color: "#475569", marginTop: "2px" }}>{label}</div>
-            </div>
-          ))}
-        </div>
-      )}
+//   return (
+//     <div>
+//       {payments.length > 0 && (
+//         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "10px", marginBottom: "20px" }}>
+//           {statCards.map(({ label, value, color, icon }) => (
+//             <div key={label} style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "12px", padding: "14px 16px" }}>
+//               <div style={{ fontSize: "18px", marginBottom: "6px" }}>{icon}</div>
+//               <div style={{ fontSize: "20px", fontWeight: "800", color }}>{value}</div>
+//               <div style={{ fontSize: "11px", color: "#475569", marginTop: "2px" }}>{label}</div>
+//             </div>
+//           ))}
+//         </div>
+//       )}
 
-      {payments.length === 0 && (
-        <div style={{ textAlign: "center", padding: "60px 0" }}>
-          <div style={{ fontSize: "42px", marginBottom: "10px" }}>🧾</div>
-          <div style={{ fontSize: "14px", fontWeight: "600", color: "#e2e8f0", marginBottom: "6px" }}>No payment history yet</div>
-          <div style={{ fontSize: "13px", color: "#475569" }}>Your payment transactions will appear here once you make a booking payment.</div>
-        </div>
-      )}
+//       {payments.length === 0 && (
+//         <div style={{ textAlign: "center", padding: "60px 0" }}>
+//           <div style={{ fontSize: "42px", marginBottom: "10px" }}>🧾</div>
+//           <div style={{ fontSize: "14px", fontWeight: "600", color: "#e2e8f0", marginBottom: "6px" }}>No payment history yet</div>
+//           <div style={{ fontSize: "13px", color: "#475569" }}>Your payment transactions will appear here once you make a booking payment.</div>
+//         </div>
+//       )}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-        {payments.map((p) => {
-          const gw         = GW_CFG[p.gateway?.toLowerCase()] || GW_CFG.manual;
-          const txn        = TXN_STATUS[p.status] || TXN_STATUS.pending;
-          const isRefunded = p.status === "refunded";
+//       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+//         {payments.map((p) => {
+//           const gw         = GW_CFG[p.gateway?.toLowerCase()] || GW_CFG.manual;
+//           const txn        = TXN_STATUS[p.status] || TXN_STATUS.pending;
+//           const isRefunded = p.status === "refunded";
 
-          return (
-            <div key={p.id} style={{
-              background:   isRefunded ? "rgba(239,68,68,0.04)" : "rgba(255,255,255,0.02)",
-              border:       `1px solid ${isRefunded ? "rgba(239,68,68,0.18)" : "rgba(255,255,255,0.07)"}`,
-              borderRadius: "12px", padding: "16px 18px",
-              borderLeft:   `3px solid ${txn.color}`,
-            }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px", flexWrap: "wrap" }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", marginBottom: "4px" }}>
-                    <span style={{ fontSize: "16px" }}>{gw.icon}</span>
-                    <span style={{ fontSize: "14px", fontWeight: "700", color: "#e2e8f0" }}>{gw.label}</span>
-                    <span style={{ fontSize: "10px", fontWeight: "700", padding: "1px 8px", borderRadius: "10px",
-                                   background: txn.bg, color: txn.color, border: `1px solid ${txn.color}33` }}>
-                      {txn.label}
-                    </span>
-                    {isRefunded && (
-                      <span style={{ fontSize: "10px", fontWeight: "700", padding: "1px 8px", borderRadius: "10px",
-                                     background: "rgba(239,68,68,0.12)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.3)" }}>
-                        ↩ Refunded
-                      </span>
-                    )}
-                    {p._synthetic && (
-                      <span style={{ fontSize: "10px", fontWeight: "700", padding: "1px 8px", borderRadius: "10px",
-                                     background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.25)" }}>
-                        🏢 Walk-in / Cash
-                      </span>
-                    )}
-                    {!p._synthetic && p.mode && p.mode !== "online" && (
-                      <span style={{ fontSize: "10px", padding: "1px 7px", borderRadius: "10px",
-                                     background: "rgba(255,255,255,0.05)", color: "#64748b",
-                                     border: "1px solid rgba(255,255,255,0.08)", textTransform: "capitalize" }}>
-                        {p.mode}
-                      </span>
-                    )}
-                  </div>
-                  {p.booking && (
-                    <div style={{ fontSize: "12px", color: "#64748b", marginBottom: "3px" }}>
-                      🏠 Unit {p.booking.plot_number} · {p.booking.plot_type}
-                    </div>
-                  )}
-                  {(p.gateway_payment_id || p.gateway_order_id) && (
-                    <div style={{ fontSize: "11px", color: "#334155", fontFamily: "monospace" }}>
-                      Ref: {p.gateway_payment_id || p.gateway_order_id}
-                    </div>
-                  )}
-                </div>
+//           return (
+//             <div key={p.id} style={{
+//               background:   isRefunded ? "rgba(239,68,68,0.04)" : "rgba(255,255,255,0.02)",
+//               border:       `1px solid ${isRefunded ? "rgba(239,68,68,0.18)" : "rgba(255,255,255,0.07)"}`,
+//               borderRadius: "12px", padding: "16px 18px",
+//               borderLeft:   `3px solid ${txn.color}`,
+//             }}>
+//               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px", flexWrap: "wrap" }}>
+//                 <div style={{ flex: 1 }}>
+//                   <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", marginBottom: "4px" }}>
+//                     <span style={{ fontSize: "16px" }}>{gw.icon}</span>
+//                     <span style={{ fontSize: "14px", fontWeight: "700", color: "#e2e8f0" }}>{gw.label}</span>
+//                     <span style={{ fontSize: "10px", fontWeight: "700", padding: "1px 8px", borderRadius: "10px",
+//                                    background: txn.bg, color: txn.color, border: `1px solid ${txn.color}33` }}>
+//                       {txn.label}
+//                     </span>
+//                     {isRefunded && (
+//                       <span style={{ fontSize: "10px", fontWeight: "700", padding: "1px 8px", borderRadius: "10px",
+//                                      background: "rgba(239,68,68,0.12)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.3)" }}>
+//                         ↩ Refunded
+//                       </span>
+//                     )}
+//                     {p._synthetic && (
+//                       <span style={{ fontSize: "10px", fontWeight: "700", padding: "1px 8px", borderRadius: "10px",
+//                                      background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.25)" }}>
+//                         🏢 Walk-in / Cash
+//                       </span>
+//                     )}
+//                     {!p._synthetic && p.mode && p.mode !== "online" && (
+//                       <span style={{ fontSize: "10px", padding: "1px 7px", borderRadius: "10px",
+//                                      background: "rgba(255,255,255,0.05)", color: "#64748b",
+//                                      border: "1px solid rgba(255,255,255,0.08)", textTransform: "capitalize" }}>
+//                         {p.mode}
+//                       </span>
+//                     )}
+//                   </div>
+//                   {p.booking && (
+//                     <div style={{ fontSize: "12px", color: "#64748b", marginBottom: "3px" }}>
+//                       🏠 Unit {p.booking.plot_number} · {p.booking.plot_type}
+//                     </div>
+//                   )}
+//                   {(p.gateway_payment_id || p.gateway_order_id) && (
+//                     <div style={{ fontSize: "11px", color: "#334155", fontFamily: "monospace" }}>
+//                       Ref: {p.gateway_payment_id || p.gateway_order_id}
+//                     </div>
+//                   )}
+//                 </div>
 
-                <div style={{ textAlign: "right", flexShrink: 0 }}>
-                  {/* Exact 2dp amounts — user paid this precise figure */}
-                  {isRefunded ? (
-                    <>
-                      <div style={{ fontSize: "14px", fontWeight: "600", color: "#64748b", textDecoration: "line-through" }}>
-                        {fmtExact(p.amount)}
-                      </div>
-                      <div style={{ fontSize: "18px", fontWeight: "800", color: "#ef4444", marginTop: "2px" }}>
-                        −{fmtExact(p.amount)}
-                      </div>
-                      <div style={{ fontSize: "11px", color: "#888", marginTop: "1px" }}>incl. taxes · refunded</div>
-                    </>
-                  ) : (
-                    <>
-                      <div style={{ fontSize: "20px", fontWeight: "800", color: txn.color }}>{fmtExact(p.amount)}</div>
-                      <div style={{ fontSize: "11px", color: "#888", marginTop: "1px" }}>incl. taxes</div>
-                    </>
-                  )}
-                  <div style={{ fontSize: "11px", color: "#475569", marginTop: "2px" }}>
-                    {p.paid_at
-                      ? new Date(p.paid_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })
-                      : new Date(p.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
-                  </div>
-                </div>
-              </div>
-              {p.notes && (
-                <div style={{ marginTop: "8px", fontSize: "12px", color: "#475569", padding: "6px 10px", background: "rgba(255,255,255,0.02)", borderRadius: "6px" }}>
-                  📝 {p.notes}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
+//                 <div style={{ textAlign: "right", flexShrink: 0 }}>
+//                   {/* Exact 2dp amounts — user paid this precise figure */}
+//                   {isRefunded ? (
+//                     <>
+//                       <div style={{ fontSize: "14px", fontWeight: "600", color: "#64748b", textDecoration: "line-through" }}>
+//                         {fmtExact(p.amount)}
+//                       </div>
+//                       <div style={{ fontSize: "18px", fontWeight: "800", color: "#ef4444", marginTop: "2px" }}>
+//                         −{fmtExact(p.amount)}
+//                       </div>
+//                       <div style={{ fontSize: "11px", color: "#888", marginTop: "1px" }}>incl. taxes · refunded</div>
+//                     </>
+//                   ) : (
+//                     <>
+//                       <div style={{ fontSize: "20px", fontWeight: "800", color: txn.color }}>{fmtExact(p.amount)}</div>
+//                       <div style={{ fontSize: "11px", color: "#888", marginTop: "1px" }}>incl. taxes</div>
+//                     </>
+//                   )}
+//                   <div style={{ fontSize: "11px", color: "#475569", marginTop: "2px" }}>
+//                     {p.paid_at
+//                       ? new Date(p.paid_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })
+//                       : new Date(p.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+//                   </div>
+//                 </div>
+//               </div>
+//               {p.notes && (
+//                 <div style={{ marginTop: "8px", fontSize: "12px", color: "#475569", padding: "6px 10px", background: "rgba(255,255,255,0.02)", borderRadius: "6px" }}>
+//                   📝 {p.notes}
+//                 </div>
+//               )}
+//             </div>
+//           );
+//         })}
+//       </div>
+//     </div>
+//   );
+// };
 
 // ── Feedback Tab ──────────────────────────────────────────────────────────────
 const CATEGORY_CFG = {
@@ -15043,9 +15045,9 @@ const FeedbackTab = ({ feedbacks, bookings, token, onSubmitted, showToast }) => 
           </div>
           {confirmedBookings.length > 0 && (
             <select value={form.booking_id} onChange={(e) => setForm((f) => ({ ...f, booking_id: e.target.value }))}
-              style={{ ...inp(), marginBottom: "10px" }}>
-              <option value="">Select booking (optional)</option>
-              {confirmedBookings.map((b) => <option key={b.id} value={b.id}>Unit {b.plot_number} — Booking #{b.id}</option>)}
+              style={{ ...inp(), marginBottom: "10px", background: "#1e1e2e", color: "#e2e8f0", }}>
+              <option value="" style={{ background: "#1e1e2e", color: "#e2e8f0" }}>Select booking (optional)</option>
+              {confirmedBookings.map((b) => <option key={b.id} value={b.id} style={{ background: "#1e1e2e", color: "#e2e8f0" }}>Unit {b.plot_number} — Booking #{b.id}</option>)}
             </select>
           )}
           <input type="text" placeholder="Subject *" value={form.subject}
@@ -15487,7 +15489,7 @@ export default function UserDashboard() {
           <WishlistTab wishlist={wishlist} wishedIds={wishedIds} onToggle={handleWishlistToggle}
             loading={wishLoading} token={user?.token} onNavigate={navigate} fmt={fmt} />
         )}
-        {activeTab === "payments"      && <PaymentsTab payments={payments} loading={paymentsLoading} fmt={fmt} fmtExact={fmtExact} />}
+        {activeTab === "payments"      && <PaymentsTab payments={payments} loading={paymentsLoading} fmt={fmt} fmtExact={fmtExact} user={user} />}
         {activeTab === "invoices"      && <InvoicesTab user={user} fmt={fmt} />}
         {activeTab === "notifications" && (
           <NotificationsTab notifications={notifications} loading={notifsLoading} unreadCount={unreadCount}
