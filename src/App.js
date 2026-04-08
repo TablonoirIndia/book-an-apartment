@@ -2,7 +2,8 @@ import "./App.css";
 import "bootstrap-4-react";
 import "react-bootstrap";
 import "react-icons/fa";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+// import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LoadScript } from "@react-google-maps/api";
 import { Provider } from "react-redux";
 import store from "./redux/store";
@@ -47,7 +48,8 @@ function App() {
       googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}
       libraries={MAPS_LIBRARIES}
     >
-      <Router>
+      {/* <Router> */}
+      <BrowserRouter basename="/book-an-apartment">
         <Provider store={store}>
           <ToastProvider>
             <Routes>
@@ -118,7 +120,8 @@ function App() {
             <ChatBubble />
           </ToastProvider>
         </Provider>
-      </Router>
+      {/* </Router> */}
+      </BrowserRouter>
     </LoadScript>
   );
 }

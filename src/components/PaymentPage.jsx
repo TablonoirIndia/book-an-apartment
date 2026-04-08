@@ -2007,7 +2007,9 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { selectUser } from "../redux/authSlice";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://127.0.0.1:8000/api";
+import { apiUrl, imgUrl } from "../apiUrl";
+
+const API_BASE = `${apiUrl}/api`;
 
 const fmt = (n, sym = "₹") => {
   if (n == null || n === "") return "—";

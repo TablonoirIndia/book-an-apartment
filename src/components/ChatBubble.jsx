@@ -1127,7 +1127,9 @@ import { selectUser } from "../redux/authSlice";
 import { useMessages } from "../hooks/useMessages";
 import { useToast } from "../context/ToastContext";
 
-const API_BASE = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000/api";
+import { apiUrl, imgUrl } from "../apiUrl";
+
+const API_BASE = `${apiUrl}/api`;
 
 // ── Typing indicator dots ──────────────────────────────────────────────────
 const TypingDots = () => (

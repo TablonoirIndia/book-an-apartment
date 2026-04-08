@@ -360,7 +360,10 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 
-const API_BASE = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000/api";
+import { apiUrl, imgUrl } from "../apiUrl";
+
+const API_BASE = `${apiUrl}/api`;
+
 const POLL_MS = 8000; // poll every 8 seconds
 
 // ── Simple debounce (no lodash needed) ────────────────────────────────────────

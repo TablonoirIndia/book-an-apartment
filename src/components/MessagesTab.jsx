@@ -220,7 +220,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useMessages } from "../hooks/useMessages";
 
-const API_BASE = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000/api";
+import { apiUrl, imgUrl } from "../apiUrl";
+
+const API_BASE = `${apiUrl}/api`;
 
 // ── Typing dots ────────────────────────────────────────────────────────────
 const TypingDots = () => (

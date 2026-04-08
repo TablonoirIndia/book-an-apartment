@@ -5,10 +5,13 @@ import { MarkersPlugin } from "@photo-sphere-viewer/markers-plugin";
 import "@photo-sphere-viewer/core/index.css";
 import "@photo-sphere-viewer/markers-plugin/index.css";
 
+import { apiUrl, imgUrl } from "../apiUrl";
+
 // DB stores DEGREES → PSV needs RADIANS
 const toRad = (deg) => parseFloat((deg * (Math.PI / 180)).toFixed(6));
 
-const API_BASE = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000/api";
+const API_BASE = `${apiUrl}/api`;
+
 
 const ApartmentViewer = () => {
   const { masterPlanId } = useParams(); // Route: /apartment-view/:masterPlanId

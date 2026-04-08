@@ -13999,7 +13999,9 @@ import InvoicesTab from "./InvoicesTab";
 import PaymentsTab from "./PaymentsTab";
 import { color } from "d3";
 
-const API_BASE = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000/api";
+import { apiUrl, imgUrl } from "../apiUrl";
+
+const API_BASE = `${apiUrl}/api`;
 
 // ── Formatters ────────────────────────────────────────────────────────────────
 // fmt      → rounded, for main prices / totals shown to users (₹1,23,456)
