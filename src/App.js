@@ -23,7 +23,7 @@ import InstantBooking from "./components/InstantBooking";
 import SectionLayout from "./components/SectionLayout";
 import SelectedPlotLayout from "./components/SelectedPlotLayout";
 import PaymentSuccessPage from "./components/PaymentSuccessPage";
-import Floorplan3D from "./components/Floorplan3D";
+
 
 import BuildingViewer from "./components/building-viewer";
 
@@ -90,8 +90,7 @@ function App() {
                 element={<SectionLayout />}
               />
               <Route path="/instant-booking" element={<InstantBooking />} />
-
-              <Route path="/floorplan" element={<Floorplan3D />} />
+            
               <Route path="/building-viewer" element={<BuildingViewer />} />
 
               <Route path="/building-view" element={<BuildingViewePage />} />

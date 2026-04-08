@@ -6,8 +6,8 @@ body {
   font-family: Roboto, Helvetica Neue, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* background-color: #fff !important; */
-  background: linear-gradient(90deg, #96C8D2, #daf2f7, #96C8D2);
+  background-color: #fff !important;
+  /* background: linear-gradient(90deg, #96C8D2, #daf2f7, #96C8D2); */
 }
 
 code {
