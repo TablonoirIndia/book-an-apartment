@@ -16,200 +16,154 @@ import buildingIcon from "../asserts/img/building.png";
 import buildingIcon1 from "../asserts/img/building-1.png";
 import * as apiUrl from "../apiUrl";
 import * as imgUrl from "../apiUrl";
+import { useSettings } from "../context/SettingsContext";
 import "../styles/LocationPage.css";
 
-// ── Constants ──────────────────────────────────────────────
 const mapContainerStyle = { width: "100%", height: "100%" };
 
-const mapOptions = {
-  disableDefaultUI: false,
-  zoomControl: true,
-  mapTypeControl: false,
-  streetViewControl: false,
-  fullscreenControl: false,
-  styles: [
-    { elementType: "geometry", stylers: [{ color: "#0d0d0d" }] },
-    { elementType: "labels.text.stroke", stylers: [{ color: "#0d0d0d" }] },
-    { elementType: "labels.text.fill", stylers: [{ color: "#c9a96e" }] },
-    {
-      featureType: "administrative",
-      elementType: "geometry",
-      stylers: [{ color: "#1a1a1a" }],
-    },
-    {
-      featureType: "administrative.country",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#9e9e9e" }],
-    },
-    {
-      featureType: "administrative.locality",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#c9a96e" }],
-    },
-    {
-      featureType: "poi",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#757575" }],
-    },
-    {
-      featureType: "poi.park",
-      elementType: "geometry",
-      stylers: [{ color: "#181818" }],
-    },
-    {
-      featureType: "poi.park",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#616161" }],
-    },
-    {
-      featureType: "road",
-      elementType: "geometry",
-      stylers: [{ color: "#1e1e1e" }],
-    },
-    {
-      featureType: "road",
-      elementType: "geometry.stroke",
-      stylers: [{ color: "#141414" }],
-    },
-    {
-      featureType: "road",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#8a8a8a" }],
-    },
-    {
-      featureType: "road.highway",
-      elementType: "geometry",
-      stylers: [{ color: "#2c2c2c" }],
-    },
-    {
-      featureType: "road.highway",
-      elementType: "geometry.stroke",
-      stylers: [{ color: "#1a1a1a" }],
-    },
-    {
-      featureType: "road.highway",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#c9a96e" }],
-    },
-    {
-      featureType: "transit",
-      elementType: "geometry",
-      stylers: [{ color: "#1a1a1a" }],
-    },
-    {
-      featureType: "transit.station",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#757575" }],
-    },
-    {
-      featureType: "water",
-      elementType: "geometry",
-      stylers: [{ color: "#050505" }],
-    },
-    {
-      featureType: "water",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#3d3d3d" }],
-    },
-    {
-      featureType: "water",
-      elementType: "labels.text.stroke",
-      stylers: [{ color: "#050505" }],
-    },
-  ],
-};
+// ── Detect if a hex colour is "dark" (luminance < 0.35) ──────────────────────
+function isColorDark(hex = "#ffffff") {
+  try {
+    const c = hex.replace("#", "");
+    const r = parseInt(c.slice(0, 2), 16) / 255;
+    const g = parseInt(c.slice(2, 4), 16) / 255;
+    const b = parseInt(c.slice(4, 6), 16) / 255;
+    // Perceived luminance (WCAG formula)
+    const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    return lum < 0.35;
+  } catch {
+    return false;
+  }
+}
+
+// ── Map styles — light theme (matches bright page_bg) ────────────────────────
+function buildLightMapStyles(primary) {
+  return [
+    { elementType: "geometry",             stylers: [{ color: "#f5f5f5" }] },
+    { elementType: "labels.text.stroke",   stylers: [{ color: "#f5f5f5" }] },
+    { elementType: "labels.text.fill",     stylers: [{ color: "#616161" }] },
+    { featureType: "administrative",       elementType: "geometry",             stylers: [{ color: "#e0e0e0" }] },
+    { featureType: "administrative.country", elementType: "labels.text.fill",  stylers: [{ color: "#9e9e9e" }] },
+    { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#424242" }] },
+    { featureType: "poi",                  elementType: "labels.text.fill",     stylers: [{ color: "#757575" }] },
+    { featureType: "poi.park",             elementType: "geometry",             stylers: [{ color: "#e5f0e5" }] },
+    { featureType: "poi.park",             elementType: "labels.text.fill",     stylers: [{ color: "#9e9e9e" }] },
+    { featureType: "road",                 elementType: "geometry",             stylers: [{ color: "#ffffff" }] },
+    { featureType: "road",                 elementType: "geometry.stroke",      stylers: [{ color: "#e0e0e0" }] },
+    { featureType: "road",                 elementType: "labels.text.fill",     stylers: [{ color: "#9e9e9e" }] },
+    { featureType: "road.highway",         elementType: "geometry",             stylers: [{ color: "#dadada" }] },
+    { featureType: "road.highway",         elementType: "geometry.stroke",      stylers: [{ color: "#c0c0c0" }] },
+    { featureType: "road.highway",         elementType: "labels.text.fill",     stylers: [{ color: primary }] },
+    { featureType: "transit",              elementType: "geometry",             stylers: [{ color: "#e5e5e5" }] },
+    { featureType: "transit.station",      elementType: "labels.text.fill",     stylers: [{ color: "#757575" }] },
+    { featureType: "water",                elementType: "geometry",             stylers: [{ color: "#c9e8f5" }] },
+    { featureType: "water",                elementType: "labels.text.fill",     stylers: [{ color: "#9e9e9e" }] },
+    { featureType: "water",                elementType: "labels.text.stroke",   stylers: [{ color: "#c9e8f5" }] },
+  ];
+}
+
+// ── Map styles — dark theme (matches dark page_bg) ───────────────────────────
+function buildDarkMapStyles(primary) {
+  return [
+    { elementType: "geometry",             stylers: [{ color: "#0d0d0d" }] },
+    { elementType: "labels.text.stroke",   stylers: [{ color: "#0d0d0d" }] },
+    { elementType: "labels.text.fill",     stylers: [{ color: primary }] },
+    { featureType: "administrative",       elementType: "geometry",             stylers: [{ color: "#1a1a1a" }] },
+    { featureType: "administrative.country", elementType: "labels.text.fill",  stylers: [{ color: "#9e9e9e" }] },
+    { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: primary }] },
+    { featureType: "poi",                  elementType: "labels.text.fill",     stylers: [{ color: "#757575" }] },
+    { featureType: "poi.park",             elementType: "geometry",             stylers: [{ color: "#181818" }] },
+    { featureType: "poi.park",             elementType: "labels.text.fill",     stylers: [{ color: "#616161" }] },
+    { featureType: "road",                 elementType: "geometry",             stylers: [{ color: "#1e1e1e" }] },
+    { featureType: "road",                 elementType: "geometry.stroke",      stylers: [{ color: "#141414" }] },
+    { featureType: "road",                 elementType: "labels.text.fill",     stylers: [{ color: "#8a8a8a" }] },
+    { featureType: "road.highway",         elementType: "geometry",             stylers: [{ color: "#2c2c2c" }] },
+    { featureType: "road.highway",         elementType: "geometry.stroke",      stylers: [{ color: "#1a1a1a" }] },
+    { featureType: "road.highway",         elementType: "labels.text.fill",     stylers: [{ color: primary }] },
+    { featureType: "transit",              elementType: "geometry",             stylers: [{ color: "#1a1a1a" }] },
+    { featureType: "transit.station",      elementType: "labels.text.fill",     stylers: [{ color: "#757575" }] },
+    { featureType: "water",                elementType: "geometry",             stylers: [{ color: "#050505" }] },
+    { featureType: "water",                elementType: "labels.text.fill",     stylers: [{ color: "#3d3d3d" }] },
+    { featureType: "water",                elementType: "labels.text.stroke",   stylers: [{ color: "#050505" }] },
+  ];
+}
+
+function buildMapStyles(primary, pageBg) {
+  return isColorDark(pageBg)
+    ? buildDarkMapStyles(primary)
+    : buildLightMapStyles(primary);
+}
+
+function lightenHex(hex, amount) {
+  try {
+    const clean = hex.replace("#", "");
+    const r = Math.min(255, parseInt(clean.slice(0, 2), 16) + amount);
+    const g = Math.min(255, parseInt(clean.slice(2, 4), 16) + amount);
+    const b = Math.min(255, parseInt(clean.slice(4, 6), 16) + amount);
+    return "#" + [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("");
+  } catch {
+    return hex;
+  }
+}
 
 // ══════════════════════════════════════════════════════════
-// CurveOverlay — single SVG element appended to map div
+// CurveOverlay
 // ══════════════════════════════════════════════════════════
-function CurveOverlay({ map, from, markers, activeMarkerId }) {
+function CurveOverlay({ map, from, markers, activeMarkerId, primaryColor }) {
   const svgRef = useRef(null);
   const animRef = useRef(null);
   const offsetRef = useRef(0);
+  const activeColor = lightenHex(primaryColor, 30);
 
-  // ── Convert lat/lng → pixel coords relative to map div ──
-  const latLngToPixel = useCallback(
-    (lat, lng) => {
-      const proj = map.getProjection();
-      if (!proj) return { x: 0, y: 0 };
-      const scale = Math.pow(2, map.getZoom());
-      const worldPt = proj.fromLatLngToPoint(
-        new window.google.maps.LatLng(lat, lng),
-      );
-      const centerWP = proj.fromLatLngToPoint(map.getCenter());
-      const mapDiv = map.getDiv();
-      return {
-        x: mapDiv.offsetWidth / 2 + (worldPt.x - centerWP.x) * scale,
-        y: mapDiv.offsetHeight / 2 + (worldPt.y - centerWP.y) * scale,
-      };
-    },
-    [map],
-  );
+  const latLngToPixel = useCallback((lat, lng) => {
+    const proj = map.getProjection();
+    if (!proj) return { x: 0, y: 0 };
+    const scale = Math.pow(2, map.getZoom());
+    const worldPt = proj.fromLatLngToPoint(new window.google.maps.LatLng(lat, lng));
+    const centerWP = proj.fromLatLngToPoint(map.getCenter());
+    const mapDiv = map.getDiv();
+    return {
+      x: mapDiv.offsetWidth / 2 + (worldPt.x - centerWP.x) * scale,
+      y: mapDiv.offsetHeight / 2 + (worldPt.y - centerWP.y) * scale,
+    };
+  }, [map]);
 
-  // ── Build all SVG paths ───────────────────────────────
   const buildPaths = useCallback(() => {
     const svg = svgRef.current;
     if (!svg || !map || !from) return;
-
     const mapDiv = map.getDiv();
     svg.setAttribute("width", mapDiv.offsetWidth);
     svg.setAttribute("height", mapDiv.offsetHeight);
-
     while (svg.firstChild) svg.removeChild(svg.firstChild);
 
-    // Glow filter
     const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-    defs.innerHTML = `
-            <filter id="curve-glow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                <feMerge>
-                    <feMergeNode in="coloredBlur"/>
-                    <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-            </filter>
-        `;
+    defs.innerHTML = `<filter id="curve-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>`;
     svg.appendChild(defs);
 
     const p1 = latLngToPixel(from.lat, from.lng);
-
     markers.forEach((marker) => {
       const p2 = latLngToPixel(marker.lat, marker.lng);
       const isActive = activeMarkerId === marker.id;
-
-      // Bezier control point (perpendicular arc)
-      const mx = (p1.x + p2.x) / 2;
-      const my = (p1.y + p2.y) / 2;
-      const dx = p2.x - p1.x;
-      const dy = p2.y - p1.y;
+      const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
+      const dx = p2.x - p1.x, dy = p2.y - p1.y;
       const len = Math.sqrt(dx * dx + dy * dy) || 1;
       const bend = len * 0.3;
-      const cpx = mx - (dy / len) * bend;
-      const cpy = my + (dx / len) * bend;
-      const d = `M ${p1.x} ${p1.y} Q ${cpx} ${cpy} ${p2.x} ${p2.y}`;
+      const d = `M ${p1.x} ${p1.y} Q ${mx - (dy / len) * bend} ${my + (dx / len) * bend} ${p2.x} ${p2.y}`;
 
-      // Glow layer (active only)
       if (isActive) {
-        const glow = document.createElementNS(
-          "http://www.w3.org/2000/svg",
-          "path",
-        );
-        glow.setAttribute("d", d);
-        glow.setAttribute("fill", "none");
-        glow.setAttribute("stroke", "#f5c97a");
-        glow.setAttribute("stroke-width", "8");
-        glow.setAttribute("stroke-opacity", "0.18");
-        glow.setAttribute("stroke-linecap", "round");
+        const glow = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        glow.setAttribute("d", d); glow.setAttribute("fill", "none");
+        glow.setAttribute("stroke", activeColor); glow.setAttribute("stroke-width", "8");
+        glow.setAttribute("stroke-opacity", "0.18"); glow.setAttribute("stroke-linecap", "round");
         svg.appendChild(glow);
       }
 
-      // Main dashed curve
-      const path = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "path",
-      );
-      path.setAttribute("d", d);
-      path.setAttribute("fill", "none");
-      path.setAttribute("stroke", isActive ? "#f5c97a" : "#c9a96e");
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", d); path.setAttribute("fill", "none");
+      path.setAttribute("stroke", isActive ? activeColor : primaryColor);
       path.setAttribute("stroke-width", isActive ? "2.5" : "1.6");
       path.setAttribute("stroke-opacity", isActive ? "1" : "0.45");
       path.setAttribute("stroke-dasharray", "7 11");
@@ -218,49 +172,35 @@ function CurveOverlay({ map, from, markers, activeMarkerId }) {
       if (isActive) path.setAttribute("filter", "url(#curve-glow)");
       svg.appendChild(path);
 
-      // Endpoint dot
-      const dot = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "circle",
-      );
-      dot.setAttribute("cx", p2.x);
-      dot.setAttribute("cy", p2.y);
+      const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      dot.setAttribute("cx", p2.x); dot.setAttribute("cy", p2.y);
       dot.setAttribute("r", isActive ? "5" : "3.5");
-      dot.setAttribute("fill", isActive ? "#f5c97a" : "#c9a96e");
-      dot.setAttribute("stroke", "#0d0d0d");
-      dot.setAttribute("stroke-width", "1.5");
+      dot.setAttribute("fill", isActive ? activeColor : primaryColor);
+      dot.setAttribute("stroke", "#0d0d0d"); dot.setAttribute("stroke-width", "1.5");
       dot.setAttribute("opacity", isActive ? "1" : "0.6");
       svg.appendChild(dot);
     });
-  }, [map, from, markers, activeMarkerId, latLngToPixel]);
+  }, [map, from, markers, activeMarkerId, latLngToPixel, primaryColor, activeColor]);
 
-  // ── Animate dash flow ─────────────────────────────────
   useEffect(() => {
     const animate = () => {
       offsetRef.current -= 0.4;
       const svg = svgRef.current;
-      if (svg) {
-        svg.querySelectorAll("path[data-marker]").forEach((p) => {
-          p.setAttribute("stroke-dashoffset", offsetRef.current);
-        });
-      }
+      if (svg) svg.querySelectorAll("path[data-marker]").forEach((p) => p.setAttribute("stroke-dashoffset", offsetRef.current));
       animRef.current = requestAnimationFrame(animate);
     };
     animRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animRef.current);
   }, []);
 
-  // ── Rebuild on map movement ───────────────────────────
   useEffect(() => {
     if (!map) return;
     buildPaths();
     const events = ["zoom_changed", "center_changed", "bounds_changed", "idle"];
     const listeners = events.map((e) => map.addListener(e, buildPaths));
-    return () =>
-      listeners.forEach((l) => window.google.maps.event.removeListener(l));
+    return () => listeners.forEach((l) => window.google.maps.event.removeListener(l));
   }, [map, buildPaths]);
 
-  // ── Mount SVG directly into map div ──────────────────
   useEffect(() => {
     if (!map) return;
     const mapDiv = map.getDiv();
@@ -268,23 +208,10 @@ function CurveOverlay({ map, from, markers, activeMarkerId }) {
     if (!svg) return;
     mapDiv.style.position = "relative";
     mapDiv.appendChild(svg);
-    return () => {
-      if (mapDiv.contains(svg)) mapDiv.removeChild(svg);
-    };
+    return () => { if (mapDiv.contains(svg)) mapDiv.removeChild(svg); };
   }, [map]);
 
-  return (
-    <svg
-      ref={svgRef}
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        pointerEvents: "none",
-        zIndex: 2,
-      }}
-    />
-  );
+  return <svg ref={svgRef} style={{ position: "absolute", top: 0, left: 0, pointerEvents: "none", zIndex: 2 }} />;
 }
 
 // ══════════════════════════════════════════════════════════
@@ -293,10 +220,16 @@ function CurveOverlay({ map, from, markers, activeMarkerId }) {
 function GoogleMapWithMarkers() {
   const navigate = useNavigate();
   const { projectId } = useParams();
-  const [masterPlanId, setMasterPlanId] = useState(null);
-
   const mapRef = useRef(null);
 
+  const { settings, isLoaded } = useSettings();
+
+  const primaryColor = settings?.primary_color     || "#c9a96e";
+  const pageBgColor  = settings?.page_bg_color     || "#faf9f7";
+  const cardBgColor  = settings?.card_bg_color     || "#ffffff";
+  const darkTheme    = isColorDark(pageBgColor);
+
+  const [masterPlanId, setMasterPlanId] = useState(null);
   const [markers, setMarkers] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -311,7 +244,19 @@ function GoogleMapWithMarkers() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
 
-  // ── Fetch locations + project center ──────────────────
+  // ── Map options built after settings loaded ───────────────────────────────
+  const mapOptions = isLoaded
+    ? {
+        disableDefaultUI: false,
+        zoomControl: true,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
+        styles: buildMapStyles(primaryColor, pageBgColor),
+      }
+    : null;
+
+  // ── Fetch locations + project ─────────────────────────────────────────────
   useEffect(() => {
     if (!projectId) return;
     const fetchData = async () => {
@@ -328,26 +273,13 @@ function GoogleMapWithMarkers() {
           id: item.id,
           name: item.name,
           image: item.location_image,
-          location: {
-            lat: parseFloat(item.latitude),
-            lng: parseFloat(item.longitude),
-          },
+          location: { lat: parseFloat(item.latitude), lng: parseFloat(item.longitude) },
         }));
 
         setMenuItems(formatted);
-        setMarkers(
-          formatted.map((item) => ({
-            id: item.id,
-            lat: item.location.lat,
-            lng: item.location.lng,
-            name: item.name,
-          })),
-        );
+        setMarkers(formatted.map((item) => ({ id: item.id, lat: item.location.lat, lng: item.location.lng, name: item.name })));
 
-        const pc = {
-          lat: parseFloat(projData.latitude),
-          lng: parseFloat(projData.longitude),
-        };
+        const pc = { lat: parseFloat(projData.latitude), lng: parseFloat(projData.longitude) };
         setFirstLocation(pc);
         setCenter(pc);
         setProjectName(projData.project_name || "Project");
@@ -361,94 +293,68 @@ function GoogleMapWithMarkers() {
     fetchData();
   }, [projectId]);
 
-  // ── Set icons after maps API is ready ─────────────────
+  // ── Marker icons — rebuilt when maps API or theme changes ─────────────────
   useEffect(() => {
-    if (isMapsLoaded) {
-      setCustomIcon({
-        url: buildingIcon1,
-        scaledSize: new window.google.maps.Size(52, 52),
-        anchor: new window.google.maps.Point(26, 52),
-      });
-      setLocationIcon({
-        path: window.google.maps.SymbolPath.CIRCLE,
-        scale: 9,
-        fillColor: "#c9a96e",
-        fillOpacity: 1,
-        strokeColor: "#fff",
-        strokeWeight: 2,
-      });
-    }
-  }, [isMapsLoaded]);
+    if (!isMapsLoaded) return;
 
-  // ── Handlers ──────────────────────────────────────────
+    setCustomIcon({
+      url: buildingIcon1,
+      scaledSize: new window.google.maps.Size(52, 52),
+      anchor: new window.google.maps.Point(26, 52),
+    });
+
+    setLocationIcon({
+      path: window.google.maps.SymbolPath.CIRCLE,
+      scale: 9,
+      fillColor: primaryColor,
+      fillOpacity: 1,
+      strokeColor: cardBgColor,
+      strokeWeight: 2,
+    });
+  }, [isMapsLoaded, isLoaded, primaryColor, cardBgColor]);
+
+  // ── Active marker icon (brighter, larger) ─────────────────────────────────
+  const activeLocationIcon = {
+    path: window.google?.maps?.SymbolPath?.CIRCLE,
+    scale: 12,
+    fillColor: lightenHex(primaryColor, 30),
+    fillOpacity: 1,
+    strokeColor: cardBgColor,
+    strokeWeight: 3,
+  };
+
   const handleMapLoad = useCallback((m) => {
     mapRef.current = m;
     setIsMapsLoaded(true);
   }, []);
 
   const moveToLocation = useCallback((loc) => {
-    if (mapRef.current) {
-      mapRef.current.panTo(loc);
-      mapRef.current.setZoom(15);
-    }
+    if (mapRef.current) { mapRef.current.panTo(loc); mapRef.current.setZoom(15); }
   }, []);
 
   const calculateDistance = useCallback((lat1, lon1, lat2, lon2) => {
     const R = 6371;
     const dLat = (lat2 - lat1) * (Math.PI / 180);
     const dLon = (lon2 - lon1) * (Math.PI / 180);
-    const a =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos(lat1 * (Math.PI / 180)) *
-        Math.cos(lat2 * (Math.PI / 180)) *
-        Math.sin(dLon / 2) ** 2;
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) ** 2;
     return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))).toFixed(1);
   }, []);
 
-  const handleMarkerHover = useCallback((loc, id, name) => {
-    setSelectedLocation({ ...loc, name });
-    setActiveMarkerId(id);
-  }, []);
+  const handleMarkerHover   = useCallback((loc, id, name) => { setSelectedLocation({ ...loc, name }); setActiveMarkerId(id); }, []);
+  const handleProjectHover  = useCallback(() => { setSelectedProjectLocation({ ...firstLocation, name: projectName }); setActiveMarkerId("project"); }, [firstLocation, projectName]);
+  const handleMarkerClose   = useCallback(() => { setSelectedLocation(null); setSelectedProjectLocation(null); setActiveMarkerId(null); }, []);
+  const handleItemClick     = useCallback((item) => { setActiveMarkerId(item.id); moveToLocation(item.location); setSelectedLocation({ ...item.location, name: item.name }); setSelectedProjectLocation(null); }, [moveToLocation]);
+  const handleProjectClick  = useCallback(() => { if (firstLocation) { moveToLocation(firstLocation); setSelectedProjectLocation({ ...firstLocation, name: projectName }); setSelectedLocation(null); setActiveMarkerId("project"); } }, [firstLocation, projectName, moveToLocation]);
 
-  const handleProjectHover = useCallback(() => {
-    setSelectedProjectLocation({ ...firstLocation, name: projectName });
-    setActiveMarkerId("project");
-  }, [firstLocation, projectName]);
-
-  const handleMarkerClose = useCallback(() => {
-    setSelectedLocation(null);
-    setSelectedProjectLocation(null);
-    setActiveMarkerId(null);
-  }, []);
-
-  const handleItemClick = useCallback(
-    (item) => {
-      setActiveMarkerId(item.id);
-      moveToLocation(item.location);
-      setSelectedLocation({ ...item.location, name: item.name });
-      setSelectedProjectLocation(null);
-    },
-    [moveToLocation],
-  );
-
-  const handleProjectClick = useCallback(() => {
-    if (firstLocation) {
-      moveToLocation(firstLocation);
-      setSelectedProjectLocation({ ...firstLocation, name: projectName });
-      setSelectedLocation(null);
-      setActiveMarkerId("project");
-    }
-  }, [firstLocation, projectName, moveToLocation]);
-
-  // ── Loading screen ────────────────────────────────────
-  if (isLoading) {
+  // ── Loading screen ────────────────────────────────────────────────────────
+  if (isLoading || !isLoaded) {
     return (
       <div className="loc-loading">
         <div className="loc-loading__inner">
           <div className="loc-loading__pin">
             <FontAwesomeIcon icon={faMapMarkerAlt} />
           </div>
-          <p>Loading map...</p>
+          <p>{isLoading ? "Loading map..." : "Loading theme..."}</p>
         </div>
       </div>
     );
@@ -457,28 +363,17 @@ function GoogleMapWithMarkers() {
   return (
     <div className="loc-page">
       <div className="loc-map-container">
+
         {/* ── Floating Sidebar ─────────────────── */}
-        <aside
-          className={`loc-panel ${sidebarOpen ? "loc-panel--open" : "loc-panel--closed"}`}
-        >
-          <button
-            className="loc-panel__toggle"
-            onClick={() => setSidebarOpen((p) => !p)}
-            title={sidebarOpen ? "Collapse" : "Expand"}
-          >
-            <FontAwesomeIcon
-              icon={sidebarOpen ? faChevronLeft : faChevronRight}
-            />
+        <aside className={`loc-panel ${sidebarOpen ? "loc-panel--open" : "loc-panel--closed"}`}>
+          <button className="loc-panel__toggle" onClick={() => setSidebarOpen((p) => !p)} title={sidebarOpen ? "Collapse" : "Expand"}>
+            <FontAwesomeIcon icon={sidebarOpen ? faChevronLeft : faChevronRight} />
           </button>
 
           {sidebarOpen && (
             <>
-              {/* Header */}
               <div className="loc-panel__header">
-                <button
-                  className="loc-panel__back"
-                  onClick={() => navigate(-1)}
-                >
+                <button className="loc-panel__back" onClick={() => navigate(-1)}>
                   <FontAwesomeIcon icon={faArrowLeft} />
                 </button>
                 <div className="loc-panel__title">
@@ -487,43 +382,21 @@ function GoogleMapWithMarkers() {
                 </div>
               </div>
 
-              {/* Project row */}
-              <div
-                className={`loc-panel__project-item ${activeMarkerId === "project" ? "active" : ""}`}
-                onClick={handleProjectClick}
-              >
-                {/* // Sidebar project icon */}
+              <div className={`loc-panel__project-item ${activeMarkerId === "project" ? "active" : ""}`} onClick={handleProjectClick}>
                 <div className="loc-panel__project-icon">
-                  <img
-                    src={buildingIcon}
-                    alt="Project"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (masterPlanId)
-                        navigate(`/apartment-view/${masterPlanId}`);
-                    }}
-                  />
+                  <img src={buildingIcon} alt="Project" onClick={(e) => { e.stopPropagation(); if (masterPlanId) navigate(`/apartment-view/${masterPlanId}`); }} />
                 </div>
                 <div className="loc-panel__project-info">
                   <span className="loc-panel__project-name">{projectName}</span>
-                  <span className="loc-panel__project-badge">
-                    Project Location
-                  </span>
+                  <span className="loc-panel__project-badge">Project Location</span>
                 </div>
-                <FontAwesomeIcon
-                  icon={faBuilding}
-                  className="loc-panel__project-arrow"
-                />
+                <FontAwesomeIcon icon={faBuilding} className="loc-panel__project-arrow" />
               </div>
 
-              {/* Divider */}
               <div className="loc-panel__divider">
-                <span>
-                  {menuItems.length} location{menuItems.length !== 1 ? "s" : ""}
-                </span>
+                <span>{menuItems.length} location{menuItems.length !== 1 ? "s" : ""}</span>
               </div>
 
-              {/* Location list */}
               <div className="loc-panel__list">
                 {menuItems.length === 0 ? (
                   <div className="loc-panel__empty">
@@ -532,41 +405,24 @@ function GoogleMapWithMarkers() {
                   </div>
                 ) : (
                   menuItems.map((item) => (
-                    <div
-                      key={item.id}
-                      className={`loc-panel__item ${activeMarkerId === item.id ? "active" : ""}`}
-                      onClick={() => handleItemClick(item)}
-                    >
+                    <div key={item.id} className={`loc-panel__item ${activeMarkerId === item.id ? "active" : ""}`} onClick={() => handleItemClick(item)}>
                       <div className="loc-panel__item-icon">
                         {item.image ? (
-                          <img
-                            src={`${imgUrl.imgUrl}/storage/location/${item.image}`}
-                            alt={item.name}
-                          />
+                          <img src={`${imgUrl.imgUrl}/storage/location/${item.image}`} alt={item.name} />
                         ) : (
                           <FontAwesomeIcon icon={faLocationArrow} />
                         )}
                       </div>
                       <div className="loc-panel__item-info">
-                        <span className="loc-panel__item-name">
-                          {item.name}
-                        </span>
+                        <span className="loc-panel__item-name">{item.name}</span>
                         {firstLocation && (
                           <span className="loc-panel__item-dist">
                             <FontAwesomeIcon icon={faRoad} />
-                            {calculateDistance(
-                              firstLocation.lat,
-                              firstLocation.lng,
-                              item.location.lat,
-                              item.location.lng,
-                            )}{" "}
-                            km away
+                            {calculateDistance(firstLocation.lat, firstLocation.lng, item.location.lat, item.location.lng)} km away
                           </span>
                         )}
                       </div>
-                      {activeMarkerId === item.id && (
-                        <div className="loc-panel__item-dot" />
-                      )}
+                      {activeMarkerId === item.id && <div className="loc-panel__item-dot" />}
                     </div>
                   ))
                 )}
@@ -577,7 +433,7 @@ function GoogleMapWithMarkers() {
 
         {/* ── Map ──────────────────────────────── */}
         <div className="loc-map">
-          {center && (
+          {center && mapOptions && (
             <GoogleMap
               mapContainerStyle={mapContainerStyle}
               center={center}
@@ -585,94 +441,50 @@ function GoogleMapWithMarkers() {
               options={mapOptions}
               onLoad={handleMapLoad}
             >
-              {/* Animated curved lines */}
-              {isMapsLoaded &&
-                mapRef.current &&
-                firstLocation &&
-                markers.length > 0 && (
-                  <CurveOverlay
-                    map={mapRef.current}
-                    from={firstLocation}
-                    markers={markers}
-                    activeMarkerId={activeMarkerId}
-                  />
-                )}
+              {isMapsLoaded && mapRef.current && firstLocation && markers.length > 0 && (
+                <CurveOverlay
+                  map={mapRef.current}
+                  from={firstLocation}
+                  markers={markers}
+                  activeMarkerId={activeMarkerId}
+                  primaryColor={primaryColor}
+                />
+              )}
 
-              {/* Project marker */}
               {customIcon && (
                 <Marker
                   position={center}
                   icon={customIcon}
-                  onClick={() =>
-                    masterPlanId && navigate(`/apartment-view/${masterPlanId}`)
-                  }
+                  onClick={() => masterPlanId && navigate(`/apartment-view/${masterPlanId}`)}
                   onMouseOver={handleProjectHover}
                   onMouseOut={handleMarkerClose}
                   zIndex={10}
                 />
               )}
 
-              {/* Location markers */}
-              {locationIcon &&
-                markers.map((marker) => (
-                  <Marker
-                    key={marker.id}
-                    position={{ lat: marker.lat, lng: marker.lng }}
-                    icon={
-                      activeMarkerId === marker.id
-                        ? {
-                            ...locationIcon,
-                            scale: 12,
-                            fillColor: "#f5c97a",
-                            strokeWeight: 3,
-                          }
-                        : locationIcon
-                    }
-                    onMouseOver={() =>
-                      handleMarkerHover(
-                        { lat: marker.lat, lng: marker.lng },
-                        marker.id,
-                        marker.name,
-                      )
-                    }
-                    onMouseOut={handleMarkerClose}
-                    onClick={() => {
-                      const item = menuItems.find((m) => m.id === marker.id);
-                      if (item) handleItemClick(item);
-                    }}
-                    zIndex={activeMarkerId === marker.id ? 20 : 5}
-                  />
-                ))}
+              {locationIcon && markers.map((marker) => (
+                <Marker
+                  key={marker.id}
+                  position={{ lat: marker.lat, lng: marker.lng }}
+                  icon={activeMarkerId === marker.id ? activeLocationIcon : locationIcon}
+                  onMouseOver={() => handleMarkerHover({ lat: marker.lat, lng: marker.lng }, marker.id, marker.name)}
+                  onMouseOut={handleMarkerClose}
+                  onClick={() => { const item = menuItems.find((m) => m.id === marker.id); if (item) handleItemClick(item); }}
+                  zIndex={activeMarkerId === marker.id ? 20 : 5}
+                />
+              ))}
 
-              {/* Location InfoWindow */}
               {selectedLocation && (
-                <InfoWindow
-                  position={{
-                    lat: selectedLocation.lat,
-                    lng: selectedLocation.lng,
-                  }}
-                  onCloseClick={handleMarkerClose}
-                  options={{ pixelOffset: new window.google.maps.Size(0, -14) }}
-                >
+                <InfoWindow position={{ lat: selectedLocation.lat, lng: selectedLocation.lng }} onCloseClick={handleMarkerClose} options={{ pixelOffset: new window.google.maps.Size(0, -14) }}>
                   <div className="loc-popup">
-                    <div className="loc-popup__icon">
-                      <FontAwesomeIcon icon={faMapMarkerAlt} />
-                    </div>
+                    <div className="loc-popup__icon"><FontAwesomeIcon icon={faMapMarkerAlt} /></div>
                     <div className="loc-popup__body">
-                      <div className="loc-popup__name">
-                        {selectedLocation.name}
-                      </div>
+                      <div className="loc-popup__name">{selectedLocation.name}</div>
                       {firstLocation && (
                         <div className="loc-popup__meta">
                           <span className="loc-popup__dist">
                             <FontAwesomeIcon icon={faRoad} />
-                            {calculateDistance(
-                              firstLocation.lat,
-                              firstLocation.lng,
-                              selectedLocation.lat,
-                              selectedLocation.lng,
-                            )}{" "}
-                            km from project
+                            {calculateDistance(firstLocation.lat, firstLocation.lng, selectedLocation.lat, selectedLocation.lng)} km from project
                           </span>
                         </div>
                       )}
@@ -681,24 +493,12 @@ function GoogleMapWithMarkers() {
                 </InfoWindow>
               )}
 
-              {/* Project InfoWindow */}
               {selectedProjectLocation && (
-                <InfoWindow
-                  position={{
-                    lat: selectedProjectLocation.lat,
-                    lng: selectedProjectLocation.lng,
-                  }}
-                  onCloseClick={handleMarkerClose}
-                  options={{ pixelOffset: new window.google.maps.Size(0, -56) }}
-                >
+                <InfoWindow position={{ lat: selectedProjectLocation.lat, lng: selectedProjectLocation.lng }} onCloseClick={handleMarkerClose} options={{ pixelOffset: new window.google.maps.Size(0, -56) }}>
                   <div className="loc-popup loc-popup--project">
-                    <div className="loc-popup__icon loc-popup__icon--project">
-                      <FontAwesomeIcon icon={faBuilding} />
-                    </div>
+                    <div className="loc-popup__icon loc-popup__icon--project"><FontAwesomeIcon icon={faBuilding} /></div>
                     <div className="loc-popup__body">
-                      <div className="loc-popup__name">
-                        {selectedProjectLocation.name}
-                      </div>
+                      <div className="loc-popup__name">{selectedProjectLocation.name}</div>
                       <div className="loc-popup__badge">Project Location</div>
                     </div>
                   </div>
@@ -707,6 +507,7 @@ function GoogleMapWithMarkers() {
             </GoogleMap>
           )}
         </div>
+
       </div>
     </div>
   );

@@ -1,0 +1,240 @@
+/* PaymentSuccessPage.css */
+
+.success-page {
+  min-height: 100vh;
+  background: var(--page-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  font-family: var(--font-body, 'Jost', sans-serif);
+}
+
+.success-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 32px;
+  padding: 48px 40px;
+  max-width: 520px;
+  width: 100%;
+  text-align: center;
+  animation: successFadeInUp 0.5s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.success-icon {
+  font-size: 80px;
+  margin-bottom: 24px;
+  animation: successBounce 0.6s ease;
+}
+
+.success-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #22c55e;
+  margin-bottom: 12px;
+  font-family: var(--font-heading, inherit);
+  letter-spacing: -0.3px;
+}
+
+.success-message {
+  font-size: 15px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.success-details {
+  background: var(--page-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 20px;
+  margin: 24px 0;
+  text-align: left;
+}
+
+.success-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--card-border);
+  font-size: 14px;
+}
+
+.success-detail-row:last-child {
+  border-bottom: none;
+}
+
+.success-detail-label {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.success-detail-value {
+  color: var(--text-dark);
+  font-weight: 600;
+  font-family: var(--font-heading, inherit);
+}
+
+.success-detail-highlight {
+  color: var(--primary-color);
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.success-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.success-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  font-family: var(--font-body, inherit);
+}
+
+.success-btn-primary {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-color-dd));
+  color: #fff;
+  border: none;
+  box-shadow: 0 2px 8px var(--primary-color-40);
+}
+
+.success-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px var(--primary-color-50);
+}
+
+.success-btn-secondary {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--card-border);
+}
+
+.success-btn-secondary:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  transform: translateY(-1px);
+}
+
+.success-footer {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--card-border);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.success-footer-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.success-footer-link:hover {
+  text-decoration: underline;
+  color: var(--primary-hover);
+}
+
+/* Animations */
+@keyframes successFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes successBounce {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Confetti effect (optional) */
+.success-confetti {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  opacity: 0.7;
+  animation: confettiFall 3s linear forwards;
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .success-card {
+    padding: 32px 24px;
+  }
+  
+  .success-icon {
+    font-size: 64px;
+  }
+  
+  .success-title {
+    font-size: 24px;
+  }
+  
+  .success-message {
+    font-size: 14px;
+  }
+  
+  .success-btn {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+  
+  .success-detail-value {
+    font-size: 13px;
+  }
+  
+  .success-detail-highlight {
+    font-size: 16px;
+  }
+}
