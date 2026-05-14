@@ -515,7 +515,7 @@
 /* ── Overview key-facts grid ────────────────────────────────── */
 .up-facts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 1px;
   background: var(--card-border);
   border-radius: var(--radius-sm);

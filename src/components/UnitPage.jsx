@@ -2357,7 +2357,7 @@ const UnitDetailsContent = ({ unit, fmtPrice, statusColor, currency, sym, feeBre
               ["Size",       unit.plot_size ? `${unit.plot_size} sqft` : "—"],
               ["Direction",  unit.direction || "—"],
               ["Project",    unit.project_name || "—"],
-              ["Block",      unit.block || "—"],
+              ["Floor",      unit.block || "—"],
               ["Rooms",      unit.rooms?.length || "—"],
               ["Status",     unit.status],
             ].map(([lbl, val]) => (
